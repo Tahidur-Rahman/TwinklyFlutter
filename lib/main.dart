@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:twinkly_flutter/features/animation/globe_express/screens/home_screen.dart';
 import 'package:twinkly_flutter/features/animation/productivity/productivity.dart';
 import 'package:twinkly_flutter/theme/app_theme.dart';
 
@@ -22,9 +24,10 @@ class MyApp extends StatelessWidget {
       //   useMaterial3: true,
       // ),
       theme: AppTheme.lightTheme,
-      home: Productivity(),
+      home: HomeScreen(),
       routes: {
       },
     );
   }
 }
+
