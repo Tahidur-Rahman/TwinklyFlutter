@@ -59,13 +59,13 @@ class HeroSection extends StatelessWidget {
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 78, // Increased font size
-                fontWeight: FontWeight.w900, // Extra bold
-                height: 0.9,
-                letterSpacing: -2,
+                fontWeight: FontWeight.w700, // Extra bold
+                height: 1.1,
+                letterSpacing: -5,
               ),
             ),
           ),
-          SizedBox(height: 20),
+          SizedBox(height: 10),
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 500),
             transitionBuilder: (Widget child, Animation<double> animation) {
@@ -86,7 +86,7 @@ class HeroSection extends StatelessWidget {
               child: Text(
                 destination.description,
                 style: TextStyle(
-                  color: Colors.white54,
+                  color: Colors.white70,
                   fontSize: 16,
                   height: 1.5,
                 ),
@@ -97,13 +97,13 @@ class HeroSection extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 55, // Slightly larger
-                height: 55, // Slightly larger
+                width: 50, // Slightly larger
+                height: 50, // Slightly larger
                 decoration: BoxDecoration(
                   color: Color(0xFFF2C94C), // Yellowish color
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.location_on_outlined, color: Colors.black, size: 26), // Icon size
+                child: Icon(Icons.bookmark, color: Colors.white, size: 26), // Icon size
               ),
               SizedBox(width: 20),
               OutlinedButton(
@@ -113,7 +113,7 @@ class HeroSection extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
-                  padding: EdgeInsets.symmetric(horizontal: 35, vertical: 18), // More padding
+                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 20), // More padding
                 ),
                 child: Text(
                   'DISCOVER LOCATION',

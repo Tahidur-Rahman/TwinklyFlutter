@@ -20,8 +20,8 @@ class DestinationCard extends StatelessWidget {
     return GestureDetector( // Wrap with GestureDetector for tap
       onTap: onTap,
       child: Container(
-        width: 240, // Increased width
-        margin: EdgeInsets.only(right: 30), // Increased margin
+        width: 200, // Increased width
+        margin: EdgeInsets.only(right: 20), // Increased margin
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
@@ -46,9 +46,9 @@ class DestinationCard extends StatelessWidget {
               // Frosted Glass Overlay
               Positioned.fill(
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 8.0, sigmaY: 8.0), // Increased blur
+                  filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1), // Increased blur
                   child: Container(
-                    color: Colors.black.withOpacity(0.25), // Slightly more opaque
+                    color: Colors.black.withOpacity(0.2), // Slightly more opaque
                   ),
                 ),
               ),

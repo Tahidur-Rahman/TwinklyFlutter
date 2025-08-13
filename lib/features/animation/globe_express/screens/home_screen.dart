@@ -82,16 +82,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Row(
                   children: [
                     Expanded(
-                      flex: 3, // Adjusted flex for hero section
+                      flex: 2, // Adjusted flex for hero section
                       child: HeroSection(destination: destinations[_currentDestinationIndex]), // Pass current destination
                     ),
                     Expanded(
-                      flex: 2, // Adjusted flex for card list
+                      flex: 3, // Adjusted flex for card list
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Container(
-                            height: 350, // Increased height for the horizontal card list
+                            height: 320, // Increased height for the horizontal card list
                             child: ListView.builder(
                               scrollDirection: Axis.horizontal,
                               padding: EdgeInsets.only(right: 40, bottom: 20),

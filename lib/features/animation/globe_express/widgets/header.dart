@@ -53,16 +53,15 @@ class Header extends StatelessWidget {
           Text(
             text,
             style: TextStyle(
-              color: isActive ? Colors.white : Colors.white70,
+              color:  Colors.white,
               fontSize: 14,
               fontWeight: FontWeight.w600,
             ),
           ),
-          if (isActive)
             Container(
               margin: EdgeInsets.only(top: 4),
-              height: 2,
-              width: 20,
+              height: isActive?2:0,
+              width: 50,
               color: Color(0xFFF2C94C), // Yellow underline
             ),
         ],
