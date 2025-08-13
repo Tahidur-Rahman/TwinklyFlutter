@@ -58,10 +58,10 @@ class HeroSection extends StatelessWidget {
               key: ValueKey<String>(destination.name), // Key for AnimatedSwitcher
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 78, // Increased font size
+                fontSize: 65, // Increased font size
                 fontWeight: FontWeight.w700, // Extra bold
                 height: 1.1,
-                letterSpacing: -5,
+                letterSpacing: -3,
               ),
             ),
           ),

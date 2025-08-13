@@ -50,11 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   fit: BoxFit.cover,
                 ),
               ),
-              // Optional: Add a subtle blur during transition for effect
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0), // Adjust blur as needed
-                child: Container(color: Colors.transparent),
-              ),
+             
             ),
           ),
 
@@ -66,6 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
+                    Colors.black.withOpacity(0),
                     Colors.black.withOpacity(0.3),
                     Colors.black.withOpacity(0.6),
                   ],
@@ -82,11 +79,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Row(
                   children: [
                     Expanded(
-                      flex: 2, // Adjusted flex for hero section
+                      flex: 5, // Adjusted flex for hero section
                       child: HeroSection(destination: destinations[_currentDestinationIndex]), // Pass current destination
                     ),
                     Expanded(
-                      flex: 3, // Adjusted flex for card list
+                      flex: 7, // Adjusted flex for card list
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [

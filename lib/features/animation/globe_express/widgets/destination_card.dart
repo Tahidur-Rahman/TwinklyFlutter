@@ -46,9 +46,9 @@ class DestinationCard extends StatelessWidget {
               // Frosted Glass Overlay
               Positioned.fill(
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1), // Increased blur
+                  filter: ImageFilter.blur(sigmaX: 0, sigmaY: 0), // Increased blur
                   child: Container(
-                    color: Colors.black.withOpacity(0.2), // Slightly more opaque
+                    color: Colors.black.withOpacity(0.1), // Slightly more opaque
                   ),
                 ),
               ),
