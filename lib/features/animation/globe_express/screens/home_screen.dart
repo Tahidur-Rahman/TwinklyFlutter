@@ -15,6 +15,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   int _currentDestinationIndex = 0; // Active index in queue (always 0 after rotations)
+  int _currentPage = 1; // 1-based page number for display
 
   // Mutable queue for infinite carousel behavior
   late List<Destination> _destinationsQueue = List<Destination>.from(destinations);
@@ -34,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   bool _isFlying = false;
   Timer? _autoTimer;
   int? _hiddenCardIndex; // index in visible list to hide while flying
+  int? _pendingPage;
 
   // Card layout metrics used for smooth shift
   static const double _cardWidth = 200.0;
@@ -90,6 +92,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       _pendingIndex = index;
       _isFlying = true;
       _hiddenCardIndex = index;
+      _pendingPage = index + 1;
       _rectAnimation = RectTween(begin: startRect, end: endRect).animate(
         CurvedAnimation(parent: _flyController, curve: Curves.easeInOutCubic),
       );
@@ -106,7 +109,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           if (rotateAfter) {
             _rotateQueue();
             _currentDestinationIndex = 0;
+            _currentPage = _currentPage % _destinationsQueue.length + 1; // increment & wrap
+          } else if (_pendingPage != null) {
+            _currentPage = _pendingPage!.clamp(1, _destinationsQueue.length);
           }
+          _pendingPage = null;
         });
       });
   }
@@ -224,7 +231,19 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   children: [
                     Expanded(
                       flex: 5, // Adjusted flex for hero section
-                      child: HeroSection(destination: _destinationsQueue[_currentDestinationIndex]), // Pass current destination
+                      child: AnimatedBuilder(
+                        animation: _flyController,
+                        builder: (context, child) {
+                          final bool fading = _isFlying;
+                          final double t = _flyController.value;
+                          final double opacity = fading ? (1.0 - t) : 1.0;
+                          return Opacity(
+                            opacity: opacity,
+                            child: child,
+                          );
+                        },
+                        child: HeroSection(destination: _destinationsQueue[_currentDestinationIndex]),
+                      ),
                     ),
                     Expanded(
                       flex: 7, // Adjusted flex for card list
@@ -277,7 +296,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                   ],
                                 ),
                                 AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 300),
+                                  duration: const Duration(milliseconds: 350),
+                                  switchInCurve: Curves.easeOutCubic,
+                                  switchOutCurve: Curves.easeInCubic,
                                   transitionBuilder: (Widget child, Animation<double> animation) {
                                     return FadeTransition(
                                       opacity: animation,
@@ -291,12 +312,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                     );
                                   },
                                   child: Text(
-                                    '0${_currentDestinationIndex + 1}', // Update page number
-                                    key: ValueKey<int>(_currentDestinationIndex), // Key for AnimatedSwitcher
+                                    _formatPage(_currentPage),
+                                    key: ValueKey<int>(_currentPage),
                                     style: TextStyle(
                                       color: Colors.white,
-                                      fontSize: 28, // Increased font size
-                                      fontWeight: FontWeight.w800, // Bolder
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.w800,
                                     ),
                                   ),
                                 ),
@@ -326,5 +347,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       ),
       child: Icon(icon, color: Colors.white, size: 30), // Larger icon
     );
+  }
+
+  String _formatPage(int page) {
+    if (page < 10) return '0$page';
+    return '$page';
   }
 }
