@@ -18,16 +18,7 @@ class HeroSection extends StatelessWidget {
             duration: const Duration(milliseconds: 700),
             transitionBuilder: (Widget child, Animation<double> animation) {
               final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
-              return FadeTransition(
-                opacity: curved,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0, 0.06),
-                    end: Offset.zero,
-                  ).animate(curved),
-                  child: child,
-                ),
-              );
+              return FadeTransition(opacity: curved, child: child);
             },
             child: Text(
               destination.region,
@@ -44,16 +35,7 @@ class HeroSection extends StatelessWidget {
             duration: const Duration(milliseconds: 700),
             transitionBuilder: (Widget child, Animation<double> animation) {
               final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
-              return FadeTransition(
-                opacity: curved,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0, 0.06),
-                    end: Offset.zero,
-                  ).animate(curved),
-                  child: child,
-                ),
-              );
+              return FadeTransition(opacity: curved, child: child);
             },
             child: Text(
               destination.name,
@@ -72,16 +54,7 @@ class HeroSection extends StatelessWidget {
             duration: const Duration(milliseconds: 700),
             transitionBuilder: (Widget child, Animation<double> animation) {
               final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
-              return FadeTransition(
-                opacity: curved,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0, 0.06),
-                    end: Offset.zero,
-                  ).animate(curved),
-                  child: child,
-                ),
-              );
+              return FadeTransition(opacity: curved, child: child);
             },
             child: Container(
               key: ValueKey<String>(destination.description), // Key for AnimatedSwitcher

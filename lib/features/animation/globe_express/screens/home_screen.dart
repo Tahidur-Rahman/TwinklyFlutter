@@ -31,15 +31,16 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   );
 
   Animation<Rect?>? _rectAnimation;
-  int? _pendingIndex;
+  Destination? _flyingDestination; // item animating to background
+  int? _flyingIndex; // index of the card animating
   bool _isFlying = false;
   Timer? _autoTimer;
-  int? _hiddenCardIndex; // index in visible list to hide while flying
-  int? _pendingPage;
+  // no pending page tracking needed
 
   // Card layout metrics used for smooth shift
   static const double _cardWidth = 200.0;
   static const double _cardSpacing = 20.0; // right margin between cards
+  final ScrollController _listController = ScrollController();
 
   @override
   void initState() {
@@ -51,6 +52,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   void dispose() {
     _autoTimer?.cancel();
     _flyController.dispose();
+    _listController.dispose();
     super.dispose();
   }
 
@@ -60,11 +62,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       if (!mounted) return;
       if (_isFlying) return; // avoid overlapping animations
       if (_destinationsQueue.isEmpty) return;
-      _onCardTapped(0, rotateAfter: true);
+      _onCardTapped(0);
     });
   }
 
-  void _onCardTapped(int index, {bool rotateAfter = false}) {
+  void _onCardTapped(int index) {
     // Compute the starting rect of the tapped card image in global coordinates
     final key = _cardImageKeys[index];
     final contextOfImage = key.currentContext;
@@ -89,42 +91,55 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     final Rect endRect = Rect.fromLTWH(0, 0, screenSize.width, screenSize.height);
 
     setState(() {
-      _pendingIndex = index;
+      // Capture the flying item; keep queue order until animation completes
+      _flyingDestination = _destinationsQueue[index];
+      _flyingIndex = index;
       _isFlying = true;
-      _hiddenCardIndex = index;
-      _pendingPage = index + 1;
       _rectAnimation = RectTween(begin: startRect, end: endRect).animate(
         CurvedAnimation(parent: _flyController, curve: Curves.easeInOutCubic),
       );
     });
 
+    // Smooth left slide: animate list from 0 -> shift, then reset to 0 after rotation
+    final double shift = _cardWidth + _cardSpacing;
+    if (_listController.hasClients) {
+      try {
+        _listController.jumpTo(0);
+        _listController.animateTo(
+          shift,
+          duration: _flyController.duration ?? const Duration(milliseconds: 800),
+          curve: Curves.easeInOutCubic,
+        );
+      } catch (_) {}
+    }
+
     _flyController
       ..reset()
       ..forward().whenComplete(() {
+        // Rotate queue now that animation finished
         setState(() {
-          _currentDestinationIndex = _pendingIndex ?? _currentDestinationIndex;
-          _pendingIndex = null;
-          _isFlying = false;
-          _hiddenCardIndex = null;
-          if (rotateAfter) {
-            _rotateQueue();
+          if (_destinationsQueue.isNotEmpty) {
+            final first = _destinationsQueue.removeAt(0);
+            _destinationsQueue.add(first);
+            final firstKey = _cardImageKeys.removeAt(0);
+            _cardImageKeys.add(firstKey);
             _currentDestinationIndex = 0;
-            _currentPage = _currentPage % _destinationsQueue.length + 1; // increment & wrap
-          } else if (_pendingPage != null) {
-            _currentPage = _pendingPage!.clamp(1, _destinationsQueue.length);
+            _currentPage = (_currentPage % _destinationsQueue.length) + 1;
           }
-          _pendingPage = null;
+          _isFlying = false;
+          _flyingDestination = null;
+          _flyingIndex = null;
         });
+        // Reset scroll position back to 0 instantly to prepare for next cycle
+        if (_listController.hasClients) {
+          try {
+            _listController.jumpTo(0);
+          } catch (_) {}
+        }
       });
   }
 
-  void _rotateQueue() {
-    if (_destinationsQueue.isEmpty) return;
-    final first = _destinationsQueue.removeAt(0);
-    _destinationsQueue.add(first);
-    final firstKey = _cardImageKeys.removeAt(0);
-    _cardImageKeys.add(firstKey);
-  }
+  // immediate rotation handled in _onCardTapped
 
   @override
   Widget build(BuildContext context) {
@@ -137,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     return Scaffold(
       body: Stack(
         children: [
-          // Background Image (switches after fly animation completes)
+          // Background Image (shows the flying item while animating)
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 500),
             switchInCurve: Curves.easeOutCubic,
@@ -146,19 +161,26 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               return FadeTransition(opacity: animation, child: child);
             },
             child: Container(
-              key: ValueKey<String>(_destinationsQueue[_currentDestinationIndex].imageUrl), // Key for AnimatedSwitcher
+              key: ValueKey<String>(
+                _isFlying && _flyingDestination != null
+                    ? _flyingDestination!.imageUrl
+                    : _destinationsQueue[_currentDestinationIndex].imageUrl,
+              ),
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage(_destinationsQueue[_currentDestinationIndex].imageUrl),
+                  image: AssetImage(
+                    _isFlying && _flyingDestination != null
+                        ? _flyingDestination!.imageUrl
+                        : _destinationsQueue[_currentDestinationIndex].imageUrl,
+                  ),
                   fit: BoxFit.cover,
                 ),
               ),
-             
             ),
           ),
 
           // Flying overlay image from tapped card to background
-          if (_isFlying && _rectAnimation != null)
+          if (_isFlying && _rectAnimation != null && _flyingDestination != null)
             AnimatedBuilder(
               animation: _flyController,
               builder: (context, child) {
@@ -186,7 +208,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         child: DecoratedBox(
                           decoration: BoxDecoration(
                             image: DecorationImage(
-                              image: AssetImage(_destinationsQueue[_pendingIndex!].imageUrl),
+                              image: AssetImage(_flyingDestination!.imageUrl),
                               fit: BoxFit.cover,
                             ),
                             boxShadow: [
@@ -252,35 +274,24 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         children: [
                           Container(
                             height: 320, // Increased height for the horizontal card list
-                            child: AnimatedBuilder(
-                              animation: _flyController,
-                              builder: (context, child) {
-                                final bool shiftingFirst = _isFlying && _hiddenCardIndex == 0;
-                                final double dx = shiftingFirst
-                                    ? -(_cardWidth + _cardSpacing) * _flyController.value
-                                    : 0.0;
-                                return Transform.translate(
-                                  offset: Offset(dx, 0),
-                                  child: child,
+                            child: ListView.builder(
+                              controller: _listController,
+                              scrollDirection: Axis.horizontal,
+                              padding: EdgeInsets.only(right: 40, bottom: 20),
+                              itemCount: _destinationsQueue.length,
+                              itemBuilder: (context, index) {
+                                final bool isPlaceholder = _isFlying && _flyingIndex == index;
+                                return DestinationCard(
+                                  imageUrl: _destinationsQueue[index].imageUrl,
+                                  region: _destinationsQueue[index].region,
+                                  name: _destinationsQueue[index].name,
+                                  onTap: () => _onCardTapped(index), // Pass onTap callback
+                                  imageKey: _cardImageKeys[index],
+                                  hideImage: false,
+                                  hidden: isPlaceholder,
+                                  reserveSpaceWhenHidden: true,
                                 );
                               },
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                padding: EdgeInsets.only(right: 40, bottom: 20),
-                                itemCount: _destinationsQueue.length,
-                                itemBuilder: (context, index) {
-                                  return DestinationCard(
-                                    imageUrl: _destinationsQueue[index].imageUrl,
-                                    region: _destinationsQueue[index].region,
-                                    name: _destinationsQueue[index].name,
-                                    onTap: () => _onCardTapped(index), // Pass onTap callback
-                                    imageKey: _cardImageKeys[index],
-                                    hideImage: _isFlying && _pendingIndex == index,
-                                  hidden: _hiddenCardIndex == index,
-                                  reserveSpaceWhenHidden: true,
-                                  );
-                                },
-                              ),
                             ),
                           ),
                           Padding(
@@ -302,13 +313,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                   transitionBuilder: (Widget child, Animation<double> animation) {
                                     return FadeTransition(
                                       opacity: animation,
-                                      child: SlideTransition(
-                                        position: Tween<Offset>(
-                                          begin: const Offset(0, 0.5),
-                                          end: Offset.zero,
-                                        ).animate(animation),
-                                        child: child,
-                                      ),
+                                      child: child,
                                     );
                                   },
                                   child: Text(
