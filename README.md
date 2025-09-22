@@ -33,6 +33,17 @@ Mimics a productivity app interface with page transitions, animated task cards, 
 
 ---
 
+### 3. Globe Express (Web) – Card Morph Carousel
+Web-friendly hero experience where the selected card smoothly flies into the background and morphs to full-bleed. Cards auto-advance infinitely and the list glides left while preserving layout. Text and page indicators use fade-only for elegance.
+
+Key interactions:
+- Card-to-background “fly” with rounded-to-square morph and shadow fade
+- Infinite carousel with queue rotation and smooth scroll-based shift
+
+![Globe Express](assets/gifs/globe_express.gif)
+
+---
+
 ## 🚀 Getting Started
 
 Make sure to include the image in your `pubspec.yaml`:
@@ -42,3 +53,22 @@ flutter:
     - assets/images/logo.png
     - assets/gifs/character_intro.gif
     - assets/gifs/productivity_animation.gif
+    - assets/gifs/globe_express.gif
+
+```
+
+Run the app:
+
+```bash
+flutter run -d chrome   # Web
+flutter run -d ios      # iOS Simulator
+flutter run -d android  # Android
+```
+
+Open the animation list:
+- The app starts at the Animation Demos screen.
+- Pick Character Intro, Productivity, or Globe Express (Web).
+
+## 🌐 Web Notes
+- Globe Express is optimized for web layouts and large screens, but works on mobile too.
+- Hover interactions on the list screen enhance on web; they degrade gracefully on touch.
