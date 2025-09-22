@@ -6,6 +6,10 @@ import 'dart:async';
 import '../widgets/header.dart';
 import '../widgets/hero_section.dart';
 import '../widgets/destination_card.dart';
+import '../widgets/background_view.dart';
+import '../widgets/flying_overlay.dart';
+import '../widgets/cards_carousel.dart';
+import '../widgets/page_indicator.dart';
 import '../data/destination_data.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -179,75 +183,16 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     return Scaffold(
       body: Stack(
         children: [
-          // Background Image (shows the last flying item until the next flight)
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 500),
-            switchInCurve: Curves.easeOutCubic,
-            switchOutCurve: Curves.easeInCubic,
-            transitionBuilder: (Widget child, Animation<double> animation) {
-              return FadeTransition(opacity: animation, child: child);
-            },
-            child: Container(
-              key: ValueKey<String>(
-                (_backgroundDestination ?? _destinationsQueue[_currentDestinationIndex]).imageUrl,
-              ),
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage(
-                    (_backgroundDestination ?? _destinationsQueue[_currentDestinationIndex]).imageUrl,
-                  ),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
+          BackgroundView(
+            imageUrl: (_backgroundDestination ?? _destinationsQueue[_currentDestinationIndex]).imageUrl,
           ),
 
           // Flying overlay image from tapped card to background
           if (_isFlying && _rectAnimation != null && _flyingDestination != null)
-            AnimatedBuilder(
-              animation: _flyController,
-              builder: (context, child) {
-                final rect = _rectAnimation!.value!;
-                final t = _flyController.value;
-                final borderRadius = BorderRadius.lerp(
-                  BorderRadius.circular(22),
-                  BorderRadius.zero,
-                  t,
-                )!;
-                final double blur = lerpDouble(2.5, 0, t)!;
-                final double shadowBlur = lerpDouble(12, 0, t)!;
-                final double shadowDy = lerpDouble(8, 0, t)!;
-                return Positioned(
-                  left: rect.left,
-                  top: rect.top,
-                  width: rect.width,
-                  height: rect.height,
-                  child: IgnorePointer(
-                    ignoring: true,
-                    child: ClipRRect(
-                      borderRadius: borderRadius,
-                      child: ImageFiltered(
-                        imageFilter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: AssetImage(_flyingDestination!.imageUrl),
-                              fit: BoxFit.cover,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.25 * (1 - t)),
-                                blurRadius: shadowBlur,
-                                offset: Offset(0, shadowDy),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
+            FlyingOverlay(
+              controller: _flyController,
+              rectAnimation: _rectAnimation!,
+              imageUrl: _flyingDestination!.imageUrl,
             ),
 
           // Overlay for text readability
@@ -295,27 +240,23 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Container(
-                            height: 320, // Increased height for the horizontal card list
-                            child: ListView.builder(
-                              controller: _listController,
-                              scrollDirection: Axis.horizontal,
-                              padding: EdgeInsets.only(right: 40, bottom: 20),
-                              itemCount: _destinationsQueue.length,
-                              itemBuilder: (context, index) {
-                                final bool isPlaceholder = _isFlying && _flyingIndex == index;
-                                return DestinationCard(
-                                  imageUrl: _destinationsQueue[index].imageUrl,
-                                  region: _destinationsQueue[index].region,
-                                  name: _destinationsQueue[index].name,
-                                  onTap: () => _onCardTapped(index), // Pass onTap callback
-                                  imageKey: _cardImageKeys[index],
-                                  hideImage: false,
-                                  hidden: isPlaceholder,
-                                  reserveSpaceWhenHidden: true,
-                                );
-                              },
-                            ),
+                          CardsCarousel(
+                            height: 320,
+                            controller: _listController,
+                            itemCount: _destinationsQueue.length,
+                            itemBuilder: (context, index) {
+                              final bool isPlaceholder = _isFlying && _flyingIndex == index;
+                              return DestinationCard(
+                                imageUrl: _destinationsQueue[index].imageUrl,
+                                region: _destinationsQueue[index].region,
+                                name: _destinationsQueue[index].name,
+                                onTap: () => _onCardTapped(index),
+                                imageKey: _cardImageKeys[index],
+                                hideImage: false,
+                                hidden: isPlaceholder,
+                                reserveSpaceWhenHidden: true,
+                              );
+                            },
                           ),
                           Padding(
                             padding: const EdgeInsets.only(right: 40.0, bottom: 40.0),
@@ -329,26 +270,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                     _buildNavigationArrow(Icons.chevron_right),
                                   ],
                                 ),
-                                AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 350),
-                                  switchInCurve: Curves.easeOutCubic,
-                                  switchOutCurve: Curves.easeInCubic,
-                                  transitionBuilder: (Widget child, Animation<double> animation) {
-                                    return FadeTransition(
-                                      opacity: animation,
-                                      child: child,
-                                    );
-                                  },
-                                  child: Text(
-                                    _formatPage(_currentPage),
-                                    key: ValueKey<int>(_currentPage),
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
-                                ),
+                                PageIndicator(pageText: _formatPage(_currentPage)),
                               ],
                             ),
                           ),
@@ -382,3 +304,5 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     return '$page';
   }
 }
+
+// moved stateless widgets into widgets/ directory
