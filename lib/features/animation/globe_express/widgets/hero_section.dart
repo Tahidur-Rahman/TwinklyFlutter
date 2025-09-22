@@ -15,15 +15,16 @@ class HeroSection extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           AnimatedSwitcher(
-            duration: const Duration(milliseconds: 500),
+            duration: const Duration(milliseconds: 700),
             transitionBuilder: (Widget child, Animation<double> animation) {
+              final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
               return FadeTransition(
-                opacity: animation,
+                opacity: curved,
                 child: SlideTransition(
                   position: Tween<Offset>(
-                    begin: const Offset(0, 0.1),
+                    begin: const Offset(0, 0.06),
                     end: Offset.zero,
-                  ).animate(animation),
+                  ).animate(curved),
                   child: child,
                 ),
               );
@@ -40,15 +41,16 @@ class HeroSection extends StatelessWidget {
           ),
           SizedBox(height: 10),
           AnimatedSwitcher(
-            duration: const Duration(milliseconds: 500),
+            duration: const Duration(milliseconds: 700),
             transitionBuilder: (Widget child, Animation<double> animation) {
+              final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
               return FadeTransition(
-                opacity: animation,
+                opacity: curved,
                 child: SlideTransition(
                   position: Tween<Offset>(
-                    begin: const Offset(0, 0.1),
+                    begin: const Offset(0, 0.06),
                     end: Offset.zero,
-                  ).animate(animation),
+                  ).animate(curved),
                   child: child,
                 ),
               );
@@ -67,15 +69,16 @@ class HeroSection extends StatelessWidget {
           ),
           SizedBox(height: 10),
           AnimatedSwitcher(
-            duration: const Duration(milliseconds: 500),
+            duration: const Duration(milliseconds: 700),
             transitionBuilder: (Widget child, Animation<double> animation) {
+              final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
               return FadeTransition(
-                opacity: animation,
+                opacity: curved,
                 child: SlideTransition(
                   position: Tween<Offset>(
-                    begin: const Offset(0, 0.1),
+                    begin: const Offset(0, 0.06),
                     end: Offset.zero,
-                  ).animate(animation),
+                  ).animate(curved),
                   child: child,
                 ),
               );
