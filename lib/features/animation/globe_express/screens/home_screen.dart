@@ -36,6 +36,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   bool _isFlying = false;
   Timer? _autoTimer;
   // no pending page tracking needed
+  Destination? _backgroundDestination; // what the background should currently display
+  bool _bgUpdateDone = false; // ensure bg updates once near end of flight
+  VoidCallback? _flyProgressListener; // to detach listener after flight
 
   // Card layout metrics used for smooth shift
   static const double _cardWidth = 200.0;
@@ -45,6 +48,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
+    _backgroundDestination = _destinationsQueue[_currentDestinationIndex];
     _startAutoSlide();
   }
 
@@ -94,11 +98,25 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       // Capture the flying item; keep queue order until animation completes
       _flyingDestination = _destinationsQueue[index];
       _flyingIndex = index;
+      // Keep current background until the flight finishes
       _isFlying = true;
       _rectAnimation = RectTween(begin: startRect, end: endRect).animate(
         CurvedAnimation(parent: _flyController, curve: Curves.easeInOutCubic),
       );
     });
+
+    // Schedule background switch slightly before completion to avoid visible pop
+    _bgUpdateDone = false;
+    _flyProgressListener ??= () {
+      final double v = _flyController.value;
+      if (!_bgUpdateDone && v >= 0.6 && _flyingDestination != null) {
+        setState(() {
+          _backgroundDestination = _flyingDestination;
+        });
+        _bgUpdateDone = true;
+      }
+    };
+    _flyController.addListener(_flyProgressListener!);
 
     // Smooth left slide: animate list from 0 -> shift, then reset to 0 after rotation
     final double shift = _cardWidth + _cardSpacing;
@@ -126,9 +144,18 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             _currentDestinationIndex = 0;
             _currentPage = (_currentPage % _destinationsQueue.length) + 1;
           }
+          // Now that the flight has completed, update the background to the flown item
+          if (_flyingDestination != null) {
+            _backgroundDestination = _flyingDestination;
+          }
           _isFlying = false;
           _flyingDestination = null;
           _flyingIndex = null;
+          _bgUpdateDone = false;
+          if (_flyProgressListener != null) {
+            _flyController.removeListener(_flyProgressListener!);
+            _flyProgressListener = null;
+          }
         });
         // Reset scroll position back to 0 instantly to prepare for next cycle
         if (_listController.hasClients) {
@@ -152,7 +179,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     return Scaffold(
       body: Stack(
         children: [
-          // Background Image (shows the flying item while animating)
+          // Background Image (shows the last flying item until the next flight)
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 500),
             switchInCurve: Curves.easeOutCubic,
@@ -162,16 +189,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             },
             child: Container(
               key: ValueKey<String>(
-                _isFlying && _flyingDestination != null
-                    ? _flyingDestination!.imageUrl
-                    : _destinationsQueue[_currentDestinationIndex].imageUrl,
+                (_backgroundDestination ?? _destinationsQueue[_currentDestinationIndex]).imageUrl,
               ),
               decoration: BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage(
-                    _isFlying && _flyingDestination != null
-                        ? _flyingDestination!.imageUrl
-                        : _destinationsQueue[_currentDestinationIndex].imageUrl,
+                    (_backgroundDestination ?? _destinationsQueue[_currentDestinationIndex]).imageUrl,
                   ),
                   fit: BoxFit.cover,
                 ),
