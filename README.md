@@ -22,14 +22,14 @@
 ### 1. Character Intro Screen
 A splash-style animated character reveal screen with subtle movement and fade effects.
 
-![Character Intro](assets/gifs/character_intro.gif)
+![Character Intro](assets/gifs/animation-1.gif)
 
 ---
 
 ### 2. Productivity App Animation
 Mimics a productivity app interface with page transitions, animated task cards, and micro-interactions.
 
-![Productivity Animation](assets/gifs/productivity_animation.gif)
+![Productivity Animation](assets/gifs/animation-2.gif)
 
 ---
 
@@ -40,7 +40,7 @@ Key interactions:
 - Card-to-background “fly” with rounded-to-square morph and shadow fade
 - Infinite carousel with queue rotation and smooth scroll-based shift
 
-![Globe Express](assets/gifs/globe_express.gif)
+![Globe Express](assets/gifs/animation-3.gif)
 
 ---
 
@@ -51,9 +51,9 @@ Make sure to include the image in your `pubspec.yaml`:
 flutter:
   assets:
     - assets/images/logo.png
-    - assets/gifs/character_intro.gif
-    - assets/gifs/productivity_animation.gif
-    - assets/gifs/globe_express.gif
+    - assets/gifs/animation-1.gif
+    - assets/gifs/animation-2.gif
+    - assets/gifs/animation-3.gif
 
 ```
 
