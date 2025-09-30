@@ -19,25 +19,22 @@
 
 ## 🎬 Animations Implemented
 
-### 1. Character Intro Screen
-A splash-style animated character reveal screen with subtle movement and fade effects.
+<div align="center">
 
-![Character Intro](assets/gifs/animation-1.gif)
+| Character Intro | Productivity |
+|:---:|:---:|
+| ![Character Intro](assets/gifs/animation-1.gif) | ![Productivity Animation](assets/gifs/animation-2.gif) |
+| Splash-style animated character reveal with subtle movement and fade effects | Productivity app interface with page transitions, animated task cards, and micro-interactions |
 
----
-
-### 2. Productivity App Animation
-Mimics a productivity app interface with page transitions, animated task cards, and micro-interactions.
-
-![Productivity Animation](assets/gifs/animation-2.gif)
+</div>
 
 ---
 
-### 3. Globe Express (Web) – Card Morph Carousel
+### 🌐 Globe Express (Web) – Card Morph Carousel
 Web-friendly hero experience where the selected card smoothly flies into the background and morphs to full-bleed. Cards auto-advance infinitely and the list glides left while preserving layout. Text and page indicators use fade-only for elegance.
 
 Key interactions:
-- Card-to-background “fly” with rounded-to-square morph and shadow fade
+- Card-to-background "fly" with rounded-to-square morph and shadow fade
 - Infinite carousel with queue rotation and smooth scroll-based shift
 
 ![Globe Express](assets/gifs/animation-3.gif)
